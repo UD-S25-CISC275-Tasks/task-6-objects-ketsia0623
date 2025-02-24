@@ -42,6 +42,12 @@ export function isCorrect(question: Question, answer: string): boolean {
  * be exactly one of the options.
  */
 export function isValid(question: Question, answer: string): boolean {
+    if (question.type === "short_answer_question") {
+        return true;
+    }
+    if (question.type === "multiple_choice_question") {
+        return question.options.includes(answer);
+    }
     return false;
 }
 
@@ -52,7 +58,7 @@ export function isValid(question: Question, answer: string): boolean {
  * name "My First Question" would become "9: My First Q".
  */
 export function toShortForm(question: Question): string {
-    return "";
+    return `${question.id}: ${question.name.slice(0, 10)}`;
 }
 
 /**
@@ -73,7 +79,13 @@ export function toShortForm(question: Question): string {
  * Check the unit tests for more examples of what this looks like!
  */
 export function toMarkdown(question: Question): string {
-    return "";
+    var answer = `# ${question.name}\n${question.body}`;
+
+    if (question.type === "multiple_choice_question") {
+        answer +=
+            "\n" + question.options.map((option) => `- ${option}`).join("\n");
+    }
+    return answer;
 }
 
 /**
@@ -140,7 +152,16 @@ export function duplicateQuestion(id: number, oldQuestion: Question): Question {
  * Check out the subsection about "Nested Fields" for more information.
  */
 export function addOption(question: Question, newOption: string): Question {
-    return question;
+    return {
+        id: question.id,
+        name: question.name,
+        body: question.body,
+        type: question.type,
+        options: [...question.options, newOption],
+        expected: question.expected,
+        points: question.points,
+        published: question.published,
+    };
 }
 
 /**
@@ -157,5 +178,14 @@ export function mergeQuestion(
     contentQuestion: Question,
     { points }: { points: number },
 ): Question {
-    return contentQuestion;
+    return {
+        id: id,
+        name: name,
+        body: contentQuestion.body,
+        type: contentQuestion.type,
+        options: [...contentQuestion.options],
+        expected: contentQuestion.expected,
+        points: points,
+        published: false,
+    };
 }
